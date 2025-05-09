@@ -2,6 +2,20 @@
 
 import { GoogleSpreadsheet } from "google-spreadsheet"
 import { JWT } from "google-auth-library"
+import { headers } from "next/headers"
+
+// Type for metadata
+type SubmissionMetadata = {
+  userAgent?: string
+  ip?: string
+  referer?: string
+  utmSource?: string
+  utmMedium?: string
+  utmCampaign?: string
+  screenSize?: string
+  timestamp: string
+  timezone: string
+}
 
 // Function to send email and store in Google Sheets
 export async function submitEmail(formData: FormData) {
@@ -12,22 +26,47 @@ export async function submitEmail(formData: FormData) {
       return { success: false, message: "Please provide a valid email address" }
     }
 
-    console.log("Starting Google Sheets integration for email:", email)
+    // Collect metadata
+    const headersList = headers()
+    const userAgent = headersList.get("user-agent") || "Unknown"
+    const referer = headersList.get("referer") || "Direct"
 
-    // Detailed debugging for environment variables
-    const debugInfo = {
-      hasServiceAccountEmail: !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      hasPrivateKey: !!process.env.GOOGLE_PRIVATE_KEY,
-      hasSheetId: !!process.env.GOOGLE_SHEET_ID,
-      serviceAccountEmailLength: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.length || 0,
-      privateKeyLength: process.env.GOOGLE_PRIVATE_KEY?.length || 0,
-      sheetIdLength: process.env.GOOGLE_SHEET_ID?.length || 0,
+    // Get IP address (this will be the IP of the edge function in Vercel)
+    const ip = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Unknown"
+
+    // Get UTM parameters from the form data
+    const utmSource = (formData.get("utm_source") as string) || "None"
+    const utmMedium = (formData.get("utm_medium") as string) || "None"
+    const utmCampaign = (formData.get("utm_campaign") as string) || "None"
+
+    // Get screen size from form data
+    const screenSize = (formData.get("screen_size") as string) || "Unknown"
+
+    // Create timestamp with timezone
+    const now = new Date()
+    const timestamp = now.toISOString()
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC" + now.getTimezoneOffset() / -60
+
+    // Compile metadata
+    const metadata: SubmissionMetadata = {
+      userAgent,
+      ip,
+      referer,
+      utmSource,
+      utmMedium,
+      utmCampaign,
+      screenSize,
+      timestamp,
+      timezone,
     }
 
-    console.log("Environment variable check:", debugInfo)
+    // Convert metadata to JSON string
+    const metadataString = JSON.stringify(metadata)
+
+    console.log("Collected metadata:", metadata)
 
     // 1. Store email in Google Spreadsheet with detailed error handling
-    const spreadsheetResult = await addEmailToSpreadsheet(email)
+    const spreadsheetResult = await addEmailToSpreadsheet(email, timestamp, metadataString)
     console.log("Spreadsheet result:", spreadsheetResult)
 
     if (!spreadsheetResult.success) {
@@ -54,7 +93,7 @@ export async function submitEmail(formData: FormData) {
 }
 
 // Function to add email to Google Spreadsheet with enhanced debugging
-async function addEmailToSpreadsheet(email: string) {
+async function addEmailToSpreadsheet(email: string, timestamp: string, metadata: string) {
   try {
     // Check if all required environment variables are available
     if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) {
@@ -101,7 +140,7 @@ async function addEmailToSpreadsheet(email: string) {
         sheet = await doc
           .addSheet({
             title: "PgCache Signups",
-            headerValues: ["email", "timestamp"],
+            headerValues: ["email", "timestamp", "metadata"],
           })
           .catch((err) => {
             console.error("Error creating new sheet:", err)
@@ -110,11 +149,12 @@ async function addEmailToSpreadsheet(email: string) {
       }
 
       console.log("Adding row to sheet...")
-      // Add a row with the email and timestamp
+      // Add a row with the email, timestamp, and metadata
       await sheet
         .addRow({
           email: email,
-          timestamp: new Date().toISOString(),
+          timestamp: timestamp,
+          metadata: metadata,
         })
         .catch((err) => {
           console.error("Error adding row to sheet:", err)

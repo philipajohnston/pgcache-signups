@@ -2,11 +2,29 @@
 
 import type React from "react"
 
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import { ArrowRight, CheckCircle, Database, Zap, Globe, Clock, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
+
+// Function to get UTM parameters from URL
+function getUTMParams() {
+  if (typeof window === "undefined") return {}
+
+  const urlParams = new URLSearchParams(window.location.search)
+  return {
+    utm_source: urlParams.get("utm_source") || "",
+    utm_medium: urlParams.get("utm_medium") || "",
+    utm_campaign: urlParams.get("utm_campaign") || "",
+  }
+}
+
+// Function to get screen size
+function getScreenSize() {
+  if (typeof window === "undefined") return ""
+  return `${window.innerWidth}x${window.innerHeight}`
+}
 
 export default function Home() {
   const [email, setEmail] = useState("")
@@ -16,6 +34,22 @@ export default function Home() {
   const [formMessage, setFormMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
   const [debugInfo, setDebugInfo] = useState<string | null>(null)
+  const [utmParams, setUtmParams] = useState<Record<string, string>>({})
+  const [screenSize, setScreenSize] = useState("")
+
+  // Collect UTM parameters and screen size on component mount
+  useEffect(() => {
+    setUtmParams(getUTMParams())
+    setScreenSize(getScreenSize())
+
+    // Update screen size on resize
+    const handleResize = () => {
+      setScreenSize(getScreenSize())
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -43,9 +77,17 @@ export default function Home() {
       return
     }
 
-    // Create FormData object
+    // Create FormData object with email and metadata
     const formData = new FormData()
     formData.append("email", email)
+
+    // Add UTM parameters
+    Object.entries(utmParams).forEach(([key, value]) => {
+      formData.append(key, value)
+    })
+
+    // Add screen size
+    formData.append("screen_size", screenSize)
 
     // Use React's useTransition to handle the server action
     startTransition(async () => {
