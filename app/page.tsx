@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useTransition, useEffect } from "react"
-import { ArrowRight, CheckCircle, Database, Zap, Globe, Clock, AlertCircle } from "lucide-react"
+import { ArrowRight, CheckCircle, Database, Zap, Globe, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
@@ -33,7 +33,6 @@ export default function Home() {
   const [isPending, startTransition] = useTransition()
   const [formMessage, setFormMessage] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
-  const [debugInfo, setDebugInfo] = useState<string | null>(null)
   const [utmParams, setUtmParams] = useState<Record<string, string>>({})
   const [screenSize, setScreenSize] = useState("")
 
@@ -62,7 +61,6 @@ export default function Home() {
     // Reset states
     setIsValid(true)
     setErrorMessage("")
-    setDebugInfo(null)
 
     // Validate email format
     if (!email.trim()) {
@@ -102,17 +100,12 @@ export default function Home() {
         } else {
           setIsValid(false)
           setErrorMessage(result.message)
-          // Store debug info if available
-          if (result.debug) {
-            setDebugInfo(result.debug)
-            console.error("Debug info:", result.debug)
-          }
         }
       } catch (error) {
         setIsValid(false)
-        setErrorMessage("An unexpected error occurred. Please try again.")
-        setDebugInfo(error instanceof Error ? error.message : String(error))
-        console.error("Form submission error:", error)
+        setErrorMessage(
+          "The AI agent seems to have made a coding error. Send an email over to <philip@pgcache.com>, and we'll make sure you get on the list!",
+        )
       }
     })
   }
@@ -134,7 +127,7 @@ export default function Home() {
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
             Supercharge your PostgreSQL databases with our edge caching solution. Reduce latency, improve response
-            times, and scale effortlessly.
+            times, scale effortlessly. 
           </p>
 
           {/* Email Form */}
@@ -160,19 +153,6 @@ export default function Home() {
                 </Button>
               </div>
               <p className="text-sm text-gray-500 mt-2">Be the first to know when our MVP launches</p>
-
-              {/* Debug Information */}
-              {debugInfo && (
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-left">
-                  <div className="flex items-start">
-                    <AlertCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-medium text-yellow-800">Debugging Information:</p>
-                      <pre className="mt-1 text-xs text-yellow-700 overflow-auto max-h-40">{debugInfo}</pre>
-                    </div>
-                  </div>
-                </div>
-              )}
             </form>
           ) : (
             <div className="max-w-md mx-auto bg-green-50 p-4 rounded-lg border border-green-200">
@@ -236,15 +216,15 @@ export default function Home() {
             </p>
 
             <p className="mt-4">
-              PgCache isn't just another tool—it's the solution we wished existed when we were in your shoes. We
+              PgCache isn't just another tool. It's the solution we wished existed when we were in your shoes. We
               understand the pain of watching response times climb during traffic spikes and the frustration of complex
               caching implementations that require constant maintenance.
             </p>
 
             <p className="mt-4">
               Our edge caching solution integrates seamlessly with your existing infrastructure, giving you the
-              performance benefits without the operational overhead. Because we believe you should be building the
-              future, not babysitting your database.
+              performance benefits without the operational overhead. We'll do the annoying work for you, so that you can focus
+              on what matters.
             </p>
           </div>
 
