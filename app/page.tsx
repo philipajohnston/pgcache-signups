@@ -2,16 +2,20 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { ArrowRight, CheckCircle, Database, Zap, Globe, Clock } from "lucide-react"
+import { useState, useTransition } from "react"
+import { ArrowRight, CheckCircle, Database, Zap, Globe, Clock, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { submitEmail } from "./actions"
 
 export default function Home() {
   const [email, setEmail] = useState("")
   const [isValid, setIsValid] = useState(true)
   const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [formMessage, setFormMessage] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
   const validateEmail = (email: string) => {
     const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -21,19 +25,54 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!validateEmail(email)) {
+    // Reset states
+    setIsValid(true)
+    setErrorMessage("")
+    setDebugInfo(null)
+
+    // Validate email format
+    if (!email.trim()) {
       setIsValid(false)
+      setErrorMessage("Email address is required")
       return
     }
 
-    setIsValid(true)
-    setIsSubmitting(true)
+    if (!validateEmail(email)) {
+      setIsValid(false)
+      setErrorMessage("Please enter a valid email address")
+      return
+    }
 
-    // Simulate API call to store email
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    // Create FormData object
+    const formData = new FormData()
+    formData.append("email", email)
 
-    setIsSubmitted(true)
-    setIsSubmitting(false)
+    // Use React's useTransition to handle the server action
+    startTransition(async () => {
+      try {
+        const result = await submitEmail(formData)
+
+        if (result.success) {
+          setIsSubmitted(true)
+          setFormMessage(result.message)
+          // Clear the form
+          setEmail("")
+        } else {
+          setIsValid(false)
+          setErrorMessage(result.message)
+          // Store debug info if available
+          if (result.debug) {
+            setDebugInfo(result.debug)
+            console.error("Debug info:", result.debug)
+          }
+        }
+      } catch (error) {
+        setIsValid(false)
+        setErrorMessage("An unexpected error occurred. Please try again.")
+        setDebugInfo(error instanceof Error ? error.message : String(error))
+        console.error("Form submission error:", error)
+      }
+    })
   }
 
   return (
@@ -63,28 +102,43 @@ export default function Home() {
                 <div className="flex-grow">
                   <Input
                     type="email"
+                    name="email"
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className={`w-full ${!isValid ? "border-red-500 focus:ring-red-500" : ""}`}
                     aria-label="Email address"
+                    disabled={isPending}
                   />
-                  {!isValid && (
-                    <p className="text-red-500 text-sm mt-1 text-left">Please enter a valid email address</p>
-                  )}
+                  {!isValid && errorMessage && <p className="text-red-500 text-sm mt-1 text-left">{errorMessage}</p>}
                 </div>
-                <Button type="submit" className="whitespace-nowrap" disabled={isSubmitting}>
-                  {isSubmitting ? "Submitting..." : "Notify Me"}
-                  {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                <Button type="submit" className="whitespace-nowrap" disabled={isPending}>
+                  {isPending ? "Submitting..." : "Notify Me"}
+                  {!isPending && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               </div>
               <p className="text-sm text-gray-500 mt-2">Be the first to know when our MVP launches</p>
+
+              {/* Debug Information */}
+              {debugInfo && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md text-left">
+                  <div className="flex items-start">
+                    <AlertCircle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-yellow-800">Debugging Information:</p>
+                      <pre className="mt-1 text-xs text-yellow-700 overflow-auto max-h-40">{debugInfo}</pre>
+                    </div>
+                  </div>
+                </div>
+              )}
             </form>
           ) : (
             <div className="max-w-md mx-auto bg-green-50 p-4 rounded-lg border border-green-200">
               <div className="flex items-center">
                 <CheckCircle className="h-6 w-6 text-green-500 mr-2" />
-                <p className="text-green-800 font-medium">Thanks! We'll notify you when we launch.</p>
+                <p className="text-green-800 font-medium">
+                  {formMessage || "Thanks! We'll notify you when we launch."}
+                </p>
               </div>
             </div>
           )}
