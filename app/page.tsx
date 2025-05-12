@@ -93,6 +93,18 @@ export default function Home() {
         const result = await submitEmail(formData)
 
         if (result.success) {
+          // Track successful submission with Vercel Analytics
+          if (typeof window !== "undefined" && window.va) {
+            window.va("event", {
+              name: "signup",
+              data: {
+                source: utmParams.utm_source || "direct",
+                medium: utmParams.utm_medium || "none",
+                campaign: utmParams.utm_campaign || "none",
+              },
+            })
+          }
+
           setIsSubmitted(true)
           setFormMessage(result.message)
           // Clear the form
@@ -104,7 +116,7 @@ export default function Home() {
       } catch (error) {
         setIsValid(false)
         setErrorMessage(
-          "The AI agent seems to have made a coding error. Send an email over to <philip@pgcache.com>, and we'll make sure you get on the list!",
+          "The AI agent seems to have made a coding error. Send an email over to philip@pgcache.com, and we'll make sure you get on the list!",
         )
       }
     })
@@ -127,7 +139,7 @@ export default function Home() {
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
             Supercharge your PostgreSQL databases with our edge caching solution. Reduce latency, improve response
-            times, scale effortlessly. 
+            times, scale effortlessly.
           </p>
 
           {/* Email Form */}
@@ -223,8 +235,8 @@ export default function Home() {
 
             <p className="mt-4">
               Our edge caching solution integrates seamlessly with your existing infrastructure, giving you the
-              performance benefits without the operational overhead. We'll do the annoying work for you, so that you can focus
-              on what matters.
+              performance benefits without the operational overhead. We'll do the annoying work for you, so that you can
+              focus on what matters.
             </p>
           </div>
 
