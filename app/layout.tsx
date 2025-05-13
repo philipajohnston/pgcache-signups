@@ -10,9 +10,9 @@ import { Suspense } from "react"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "PgCache - Edge Caching for PostgreSQL",
+  title: "PgCache - Easy Caching for PostgreSQL",
   description:
-    "Supercharge your PostgreSQL databases with our edge caching solution. Reduce latency, improve response times, and scale effortlessly.",
+    "Refocus on what matters by letting our transparent postgres proxy handle the grunt work. Effortlessly stand up & maintain your caches.",
     generator: 'v0.dev'
 }
 
