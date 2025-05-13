@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useTransition, useEffect } from "react"
-import { ArrowRight, CheckCircle, Database, Zap, Globe, Clock } from "lucide-react"
+import { ArrowRight, CheckCircle, Database, Zap, Shield, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
@@ -135,11 +135,11 @@ export default function Home() {
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
         <div className="text-center">
           <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-            Edge Caching for PostgreSQL
+            Easy Caching for PostgreSQL
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-            Supercharge your PostgreSQL databases with our edge caching solution. Reduce latency, improve response
-            times, scale effortlessly.
+            Refocus on what matters by letting our transparent postgres proxy handle the grunt work. Effortlessly stand
+            up & maintain your caches.
           </p>
 
           {/* Email Form */}
@@ -186,30 +186,32 @@ export default function Home() {
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center mb-4">
                 <Zap className="h-6 w-6 text-yellow-500 mr-2" />
-                <h3 className="font-bold text-lg">Lightning Fast</h3>
+                <h3 className="font-bold text-lg">Transparent Proxy</h3>
               </div>
               <p className="text-gray-600">
-                Reduce query latency by up to 90% with intelligent edge caching strategies.
+                Drop-in solution that sits between your app and database. No code changes required, just point and
+                cache.
               </p>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center mb-4">
-                <Globe className="h-6 w-6 text-blue-500 mr-2" />
-                <h3 className="font-bold text-lg">Global Edge Network</h3>
+                <Wrench className="h-6 w-6 text-blue-500 mr-2" />
+                <h3 className="font-bold text-lg">Maintenance-Free</h3>
               </div>
               <p className="text-gray-600">
-                Deploy cached data close to your users for consistent performance worldwide.
+                Automatic cache invalidation and management. No more writing complex cache logic or debugging stale
+                data.
               </p>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-sm border">
               <div className="flex items-center mb-4">
-                <Database className="h-6 w-6 text-purple-500 mr-2" />
-                <h3 className="font-bold text-lg">Zero Config</h3>
+                <Shield className="h-6 w-6 text-purple-500 mr-2" />
+                <h3 className="font-bold text-lg">Query-Aware</h3>
               </div>
               <p className="text-gray-600">
-                Simple integration with your existing PostgreSQL databases. No complex setup.
+                Intelligently caches based on your actual query patterns. Understands PostgreSQL query semantics deeply.
               </p>
             </div>
           </div>
@@ -219,31 +221,32 @@ export default function Home() {
       {/* Engineer-focused Section */}
       <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
         <div className="border-t pt-10">
-          <h2 className="text-2xl font-bold text-center mb-8">Built by Engineers, for Engineers</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">By PostgreSQL Power Users, For PostgreSQL Teams</h2>
 
           <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
             <p>
-              We're a team of database engineers who got tired of watching our PostgreSQL instances struggle under load.
-              We've spent countless nights optimizing queries, scaling instances, and implementing caching layers.
+              We're a team of database engineers who've spent years optimizing PostgreSQL deployments. We've written
+              more EXPLAIN ANALYZE queries than we care to admit, and we've felt the pain of managing caching layers
+              firsthand.
             </p>
 
             <p className="mt-4">
-              PgCache isn't just another tool. It's the solution we wished existed when we were in your shoes. We
-              understand the pain of watching response times climb during traffic spikes and the frustration of complex
-              caching implementations that require constant maintenance.
+              PgCache was born from our own frustrations with existing solutions. We wanted something that understood
+              PostgreSQL deeply—something that could parse queries, track dependencies, and automatically invalidate
+              caches without requiring us to rewrite our applications.
             </p>
 
             <p className="mt-4">
-              Our edge caching solution integrates seamlessly with your existing infrastructure, giving you the
-              performance benefits without the operational overhead. We'll do the annoying work for you, so that you can
-              focus on what matters.
+              Our transparent proxy approach means you don't need to change your code or learn complex caching patterns.
+              We'll do the annoying work for you, so you can focus on what matters: building features that delight your
+              users, not babysitting your database performance.
             </p>
           </div>
 
           <div className="mt-10 text-center">
-            <p className="text-sm text-gray-500 flex items-center justify-center">
-              <Clock className="h-4 w-4 mr-1" />
-              Join the waitlist today. Save hours of engineering time tomorrow.
+            <p className="text-sm text-gray-600 flex items-center justify-center">
+              <Database className="h-4 w-4 mr-1" />
+              From one Postgres team to another—we've got your back.
             </p>
           </div>
         </div>
