@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useTransition, useEffect } from "react"
-import { ArrowRight, CheckCircle, Database, Zap, Shield, Wrench } from "lucide-react"
+import { ArrowRight, CheckCircle, Database, Zap, Shield, Wrench, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
@@ -128,6 +128,15 @@ export default function Home() {
       <header className="w-full py-6 px-4 sm:px-6 lg:px-8 border-b">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">PgCache</h1>
+          <a
+            href="https://calendly.com/p-pgcache/connect"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          >
+            <Calendar className="h-4 w-4 mr-2" />
+            Schedule a Call
+          </a>
         </div>
       </header>
 
@@ -144,28 +153,44 @@ export default function Home() {
 
           {/* Email Form */}
           {!isSubmitted ? (
-            <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="flex-grow">
-                  <Input
-                    type="email"
-                    name="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className={`w-full ${!isValid ? "border-red-500 focus:ring-red-500" : ""}`}
-                    aria-label="Email address"
-                    disabled={isPending}
-                  />
-                  {!isValid && errorMessage && <p className="text-red-500 text-sm mt-1 text-left">{errorMessage}</p>}
+            <div className="max-w-md mx-auto">
+              <form onSubmit={handleSubmit}>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-grow">
+                    <Input
+                      type="email"
+                      name="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className={`w-full ${!isValid ? "border-red-500 focus:ring-red-500" : ""}`}
+                      aria-label="Email address"
+                      disabled={isPending}
+                    />
+                    {!isValid && errorMessage && <p className="text-red-500 text-sm mt-1 text-left">{errorMessage}</p>}
+                  </div>
+                  <Button type="submit" className="whitespace-nowrap" disabled={isPending}>
+                    {isPending ? "Submitting..." : "Notify Me"}
+                    {!isPending && <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
                 </div>
-                <Button type="submit" className="whitespace-nowrap" disabled={isPending}>
-                  {isPending ? "Submitting..." : "Notify Me"}
-                  {!isPending && <ArrowRight className="ml-2 h-4 w-4" />}
-                </Button>
+                <p className="text-sm text-gray-500 mt-2">Be the first to know when our MVP launches</p>
+              </form>
+
+              {/* Alternative CTA */}
+              <div className="mt-6 pt-6 border-t border-gray-200">
+                <p className="text-sm text-gray-600 mb-3">Want to discuss your specific caching needs?</p>
+                <a
+                  href="https://calendly.com/p-pgcache/connect"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-700 transition-colors"
+                >
+                  <Calendar className="h-4 w-4 mr-2" />
+                  Schedule a 20-minute chat
+                </a>
               </div>
-              <p className="text-sm text-gray-500 mt-2">Be the first to know when our MVP launches</p>
-            </form>
+            </div>
           ) : (
             <div className="max-w-md mx-auto bg-green-50 p-4 rounded-lg border border-green-200">
               <div className="flex items-center">
