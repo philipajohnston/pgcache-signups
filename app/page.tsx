@@ -129,7 +129,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-900">PgCache</h1>
           <a
-            href="https://calendly.com/p-pgcache/connect"
+            href="https://calendly.com/p-pgc/pgcache-connect-20"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
@@ -181,7 +181,7 @@ export default function Home() {
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-600 mb-3">Want to discuss your specific caching needs?</p>
                 <a
-                  href="https://calendly.com/p-pgcache/connect"
+                  href="https://calendly.com/p-pgc/pgcache-connect-20"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-700 transition-colors"
