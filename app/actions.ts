@@ -25,6 +25,9 @@ async function getGoogleAuthToken() {
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   })
   const accessToken = await auth.getAccessToken()
+  if (!accessToken || !accessToken.token) {
+    throw new Error("Failed to retrieve access token from Google.")
+  }
   return accessToken.token
 }
 
@@ -32,45 +35,41 @@ async function getGoogleAuthToken() {
 async function addEmailToSpreadsheetDirect(email: string, timestamp: string, metadata: string) {
   try {
     console.log("🔍 Checking environment variables for direct API call...")
-    if (
-      !process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL ||
-      !process.env.GOOGLE_PRIVATE_KEY ||
-      !process.env.GOOGLE_SHEET_ID ||
-      !process.env.GOOGLE_API_KEY
-    ) {
+    const { GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY, GOOGLE_SHEET_ID, GOOGLE_API_KEY } = process.env
+
+    if (!GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY || !GOOGLE_SHEET_ID || !GOOGLE_API_KEY) {
       const missing = []
-      if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL) missing.push("GOOGLE_SERVICE_ACCOUNT_EMAIL")
-      if (!process.env.GOOGLE_PRIVATE_KEY) missing.push("GOOGLE_PRIVATE_KEY")
-      if (!process.env.GOOGLE_SHEET_ID) missing.push("GOOGLE_SHEET_ID")
-      if (!process.env.GOOGLE_API_KEY) missing.push("GOOGLE_API_KEY")
+      if (!GOOGLE_SERVICE_ACCOUNT_EMAIL) missing.push("GOOGLE_SERVICE_ACCOUNT_EMAIL")
+      if (!GOOGLE_PRIVATE_KEY) missing.push("GOOGLE_PRIVATE_KEY")
+      if (!GOOGLE_SHEET_ID) missing.push("GOOGLE_SHEET_ID")
+      if (!GOOGLE_API_KEY) missing.push("GOOGLE_API_KEY")
       console.error("❌ Missing environment variables:", missing)
       return { success: false, error: `Missing environment variables: ${missing.join(", ")}` }
     }
     console.log("✅ All environment variables present for direct API call")
 
     const accessToken = await getGoogleAuthToken()
-    if (!accessToken) {
-      console.error("❌ Failed to get Google Auth Token")
-      return { success: false, error: "Failed to get Google Auth Token" }
-    }
     console.log("🔑 Got Google Auth Token")
 
-    const sheetId = process.env.GOOGLE_SHEET_ID
-    const apiKey = process.env.GOOGLE_API_KEY
-    const sheetName = "PgCache Signups" // Assuming this is your sheet name
+    const sheetId = GOOGLE_SHEET_ID
+    const apiKey = GOOGLE_API_KEY
+    // IMPORTANT: Ensure this sheetName matches the tab name in your Google Sheet
+    const sheetName = "Sheet1" // Or "pgcache-cache-me" if that's the tab name
 
-    // Construct the API endpoint
-    // We'll append a row to the first available table in the sheet.
-    // Google Sheets API uses A1 notation for ranges. 'Sheet1!A1' refers to cell A1 in Sheet1.
-    // To append, we specify the sheet name.
-    const range = `${sheetName}!A1:C1` // Adjust if your columns are different
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${apiKey}`
+    // For appending, the range is typically just the sheet name.
+    // The API will append after the last row with data in this sheet.
+    // We must URL-encode the sheet name in case it has spaces or special characters.
+    const encodedSheetName = encodeURIComponent(sheetName)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodedSheetName}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS&key=${apiKey}`
 
     const body = {
+      // The API expects an array of rows, and each row is an array of cell values.
       values: [[email, timestamp, metadata]],
     }
 
-    console.log(`🚀 Calling Google Sheets API: ${url}`)
+    console.log(`🚀 Calling Google Sheets API (Append): ${url}`)
+    console.log(`📝 Append Body: ${JSON.stringify(body)}`)
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -83,14 +82,14 @@ async function addEmailToSpreadsheetDirect(email: string, timestamp: string, met
     const responseData = await response.json()
 
     if (!response.ok) {
-      console.error("❌ Google Sheets API error:", responseData)
+      console.error(`❌ Google Sheets API error (Append) - Status: ${response.status}`, responseData)
       return {
         success: false,
         error: `Google Sheets API Error: ${responseData.error?.message || response.statusText}`,
       }
     }
 
-    console.log("🎉 Successfully added row via direct API call:", responseData)
+    console.log("🎉 Successfully added row via direct API call (Append):", responseData)
     return { success: true, data: responseData }
   } catch (error) {
     console.error("💥 Error in addEmailToSpreadsheetDirect:", error)
