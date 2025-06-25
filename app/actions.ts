@@ -22,7 +22,11 @@ export async function submitEmail(formData: FormData) {
   try {
     const email = formData.get("email") as string
 
+    console.log("=== EMAIL SUBMISSION DEBUG ===")
+    console.log("Received email submission:", email)
+
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      console.log("Invalid email format:", email)
       return { success: false, message: "Please provide a valid email address" }
     }
 
@@ -58,31 +62,54 @@ export async function submitEmail(formData: FormData) {
       timezone,
     }
 
+    console.log("Collected metadata:", metadata)
+
     // Convert metadata to JSON string
     const metadataString = JSON.stringify(metadata)
 
-    // Store email in Google Spreadsheet
+    // Try to store email in Google Spreadsheet
+    console.log("Attempting Google Sheets integration...")
     const spreadsheetResult = await addEmailToSpreadsheet(email, timestamp, metadataString)
 
-    if (!spreadsheetResult.success) {
-      console.error("Failed to add email to spreadsheet:", spreadsheetResult.error)
+    if (spreadsheetResult.success) {
+      console.log("✅ Successfully added email to spreadsheet")
       return {
-        success: false,
-        message:
-          "The AI agent seems to have made a coding error. Send an email to philip@pgcache.com and we'll make sure you get on the list!",
+        success: true,
+        message: "Thank you for your interest! We'll be in touch soon.",
       }
+    } else {
+      console.error("❌ Failed to add email to spreadsheet:", spreadsheetResult.error)
+
+      // Log the email for manual recovery
+      console.log("📧 MANUAL RECOVERY - Email submission:", {
+        email,
+        timestamp,
+        metadata: metadataString,
+      })
+
+      // Return success to user but log the failure
+      return {
+        success: true,
+        message:
+          "Thank you for your interest! We'll be in touch soon. (Note: There was a backend issue, but your email was logged for manual processing)",
+      }
+    }
+  } catch (error) {
+    console.error("💥 Critical error in submitEmail:", error)
+
+    // Log the email for manual recovery if possible
+    const email = formData.get("email") as string
+    if (email) {
+      console.log("📧 MANUAL RECOVERY - Email submission (error case):", {
+        email,
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
 
     return {
-      success: true,
-      message: "Thank you for your interest! We'll be in touch soon.",
-    }
-  } catch (error) {
-    console.error("Error in submitEmail:", error)
-    return {
       success: false,
-      message:
-        "The AI agent seems to have made a coding error. Send an email to philip@pgcache.com and we'll make sure you get on the list!",
+      message: "There was a technical issue. Please email philip@pgcache.com directly and we'll add you to the list!",
     }
   }
 }
@@ -90,13 +117,44 @@ export async function submitEmail(formData: FormData) {
 // Function to add email to Google Spreadsheet
 async function addEmailToSpreadsheet(email: string, timestamp: string, metadata: string) {
   try {
+    console.log("🔍 Checking environment variables...")
+
     // Check if all required environment variables are available
-    if (!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.GOOGLE_SHEET_ID) {
-      return { success: false, error: "Missing required environment variables" }
+    const hasEmail = !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
+    const hasKey = !!process.env.GOOGLE_PRIVATE_KEY
+    const hasSheetId = !!process.env.GOOGLE_SHEET_ID
+
+    console.log("Environment variables status:", {
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: hasEmail,
+      GOOGLE_PRIVATE_KEY: hasKey,
+      GOOGLE_SHEET_ID: hasSheetId,
+    })
+
+    if (!hasEmail || !hasKey || !hasSheetId) {
+      const missing = []
+      if (!hasEmail) missing.push("GOOGLE_SERVICE_ACCOUNT_EMAIL")
+      if (!hasKey) missing.push("GOOGLE_PRIVATE_KEY")
+      if (!hasSheetId) missing.push("GOOGLE_SHEET_ID")
+
+      console.error("❌ Missing environment variables:", missing)
+      return { success: false, error: `Missing environment variables: ${missing.join(", ")}` }
     }
 
+    console.log("✅ All environment variables present")
+
     // Format the private key correctly
+    console.log("🔑 Formatting private key...")
     const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n")
+
+    // Log first and last few characters of key for debugging (safely)
+    console.log("Private key format check:", {
+      startsWithBegin: privateKey.startsWith("-----BEGIN"),
+      endsWithEnd: privateKey.endsWith("-----"),
+      length: privateKey.length,
+      hasNewlines: privateKey.includes("\n"),
+    })
+
+    console.log("🔐 Creating JWT auth...")
 
     // Initialize auth with service account credentials
     const serviceAccountAuth = new JWT({
@@ -105,18 +163,33 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     })
 
+    console.log("📊 Initializing Google Spreadsheet...")
+    console.log("Sheet ID:", process.env.GOOGLE_SHEET_ID)
+
     // Initialize the sheet
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth)
+
+    console.log("📋 Loading spreadsheet info...")
     await doc.loadInfo()
+
+    console.log("✅ Spreadsheet loaded successfully!")
+    console.log("Spreadsheet title:", doc.title)
+    console.log("Number of sheets:", doc.sheetCount)
 
     // Get the first sheet or create one if it doesn't exist
     let sheet = doc.sheetsByIndex[0]
     if (!sheet) {
+      console.log("📝 Creating new sheet...")
       sheet = await doc.addSheet({
         title: "PgCache Signups",
         headerValues: ["email", "timestamp", "metadata"],
       })
+      console.log("✅ New sheet created")
+    } else {
+      console.log("📄 Using existing sheet:", sheet.title)
     }
+
+    console.log("➕ Adding row to sheet...")
 
     // Add a row with the email, timestamp, and metadata
     await sheet.addRow({
@@ -125,8 +198,18 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
       metadata: metadata,
     })
 
+    console.log("🎉 Successfully added row to sheet!")
     return { success: true }
   } catch (error) {
+    console.error("💥 Error in addEmailToSpreadsheet:", error)
+
+    // Log more details about the error
+    if (error instanceof Error) {
+      console.error("Error name:", error.name)
+      console.error("Error message:", error.message)
+      console.error("Error stack:", error.stack)
+    }
+
     return {
       success: false,
       error: error instanceof Error ? error.message : String(error),

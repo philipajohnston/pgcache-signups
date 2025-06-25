@@ -58,6 +58,8 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    console.log("Form submitted with email:", email)
+
     // Reset states
     setIsValid(true)
     setErrorMessage("")
@@ -87,10 +89,14 @@ export default function Home() {
     // Add screen size
     formData.append("screen_size", screenSize)
 
+    console.log("Submitting form data...")
+
     // Use React's useTransition to handle the server action
     startTransition(async () => {
       try {
         const result = await submitEmail(formData)
+
+        console.log("Server action result:", result)
 
         if (result.success) {
           // Track successful submission with Vercel Analytics
@@ -114,9 +120,10 @@ export default function Home() {
           setErrorMessage(result.message)
         }
       } catch (error) {
+        console.error("Form submission error:", error)
         setIsValid(false)
         setErrorMessage(
-          "The AI agent seems to have made a coding error. Send an email over to philip@pgcache.com, and we'll make sure you get on the list!",
+          "The AI agent seems to have made a coding error. Send an email to philip@pgcache.com and we'll make sure you get on the list!",
         )
       }
     })
