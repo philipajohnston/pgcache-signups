@@ -150,14 +150,6 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
     console.log("🔑 Formatting private key...")
     const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n")
 
-    // Log first and last few characters of key for debugging (safely)
-    console.log("Private key format check:", {
-      startsWithBegin: privateKey.startsWith("-----BEGIN"),
-      endsWithEnd: privateKey.endsWith("-----"),
-      length: privateKey.length,
-      hasNewlines: privateKey.includes("\n"),
-    })
-
     console.log("🔐 Creating JWT auth...")
 
     // Initialize auth with service account credentials
@@ -167,24 +159,16 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     })
 
-    console.log("📊 Initializing Google Spreadsheet...")
-    console.log("Sheet ID:", process.env.GOOGLE_SHEET_ID)
+    console.log("📊 Initializing Google Spreadsheet with proper API key setup...")
 
-    // Initialize the sheet - try with API key in constructor first
-    let doc: GoogleSpreadsheet
+    // NEW APPROACH: Initialize with both auth methods properly
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID)
 
-    try {
-      // Method 1: Try passing API key in constructor options
-      doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth, {
-        apiKey: process.env.GOOGLE_API_KEY,
-      } as any)
-      console.log("✅ Created GoogleSpreadsheet with API key in constructor")
-    } catch (constructorError) {
-      console.log("⚠️ Constructor with API key failed, trying without...")
-      // Method 2: Fallback to just service account auth
-      doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth)
-      console.log("✅ Created GoogleSpreadsheet with service account only")
-    }
+    // Set API key first (for read operations)
+    doc.useApiKey(process.env.GOOGLE_API_KEY)
+
+    // Then set service account auth (for write operations)
+    doc.useServiceAccountAuth(serviceAccountAuth)
 
     console.log("📋 Loading spreadsheet info...")
     await doc.loadInfo()

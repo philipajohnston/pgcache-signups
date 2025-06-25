@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 import { GoogleSpreadsheet } from "google-spreadsheet"
-import { JWT } from "google-auth-library"
 
 export async function GET() {
   try {
@@ -14,7 +13,7 @@ export async function GET() {
 
     console.log("Environment variables:", { hasEmail, hasKey, hasSheetId, hasApiKey })
 
-    if (!hasEmail || !hasKey || !hasSheetId) {
+    if (!hasEmail || !hasKey || !hasSheetId || !hasApiKey) {
       return NextResponse.json({
         success: false,
         error: "Missing required environment variables",
@@ -33,33 +32,19 @@ export async function GET() {
 
     console.log("Private key format:", keyCheck)
 
-    // Test JWT creation
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: privateKey,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+    // Test Google Sheets connection with new approach
+    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!)
+
+    // Set service account auth
+    doc.useServiceAccountAuth({
+      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
+      private_key: privateKey,
     })
+    console.log("✅ Service account auth set")
 
-    console.log("JWT created successfully")
-
-    // Test Google Sheets connection
-    let doc: GoogleSpreadsheet
-
-    try {
-      // Try with API key if available
-      if (hasApiKey) {
-        doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth, {
-          apiKey: process.env.GOOGLE_API_KEY,
-        } as any)
-        console.log("Using service account + API key")
-      } else {
-        doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth)
-        console.log("Using service account only")
-      }
-    } catch (constructorError) {
-      console.log("Constructor error, falling back to service account only")
-      doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth)
-    }
+    // Set API key first
+    doc.useApiKey(process.env.GOOGLE_API_KEY!)
+    console.log("✅ API key set")
 
     await doc.loadInfo()
 
@@ -68,11 +53,10 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: "Google Sheets connection working!",
+      message: "Google Sheets connection working with new API key approach!",
       sheetTitle: doc.title,
       sheetCount: doc.sheetCount,
       keyCheck,
-      hasApiKey,
     })
   } catch (error) {
     console.error("Google Sheets test failed:", error)
