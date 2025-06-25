@@ -1,66 +1,71 @@
 import { NextResponse } from "next/server"
-import { GoogleSpreadsheet } from "google-spreadsheet"
+import { JWT } from "google-auth-library"
+
+async function getGoogleAuthTokenForTest() {
+  const privateKey = process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, "\n")
+  const auth = new JWT({
+    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    key: privateKey,
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  })
+  const accessToken = await auth.getAccessToken()
+  return accessToken.token
+}
 
 export async function GET() {
   try {
-    console.log("=== GOOGLE SHEETS CONNECTION TEST ===")
+    console.log("=== GOOGLE SHEETS CONNECTION TEST (DIRECT API) ===")
 
-    // Check environment variables
-    const hasEmail = !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
-    const hasKey = !!process.env.GOOGLE_PRIVATE_KEY
-    const hasSheetId = !!process.env.GOOGLE_SHEET_ID
-    const hasApiKey = !!process.env.GOOGLE_API_KEY
+    const hasEmailEnv = !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
+    const hasKeyEnv = !!process.env.GOOGLE_PRIVATE_KEY
+    const hasSheetIdEnv = !!process.env.GOOGLE_SHEET_ID
+    const hasApiKeyEnv = !!process.env.GOOGLE_API_KEY
 
-    console.log("Environment variables:", { hasEmail, hasKey, hasSheetId, hasApiKey })
-
-    if (!hasEmail || !hasKey || !hasSheetId) {
+    if (!hasEmailEnv || !hasKeyEnv || !hasSheetIdEnv || !hasApiKeyEnv) {
       return NextResponse.json({
         success: false,
-        error: "Missing required environment variables",
-        details: { hasEmail, hasKey, hasSheetId, hasApiKey },
+        error: "Missing environment variables",
+        details: { hasEmailEnv, hasKeyEnv, hasSheetIdEnv, hasApiKeyEnv },
       })
     }
 
-    // Test private key format
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY!.replace(/\\n/g, "\n")
-    const keyCheck = {
-      startsCorrectly: privateKey.startsWith("-----BEGIN PRIVATE KEY-----"),
-      endsCorrectly: privateKey.endsWith("-----END PRIVATE KEY-----"),
-      hasNewlines: privateKey.includes("\n"),
-      length: privateKey.length,
+    const accessToken = await getGoogleAuthTokenForTest()
+    if (!accessToken) {
+      return NextResponse.json({ success: false, error: "Failed to get Google Auth Token" })
     }
 
-    console.log("Private key format:", keyCheck)
+    const sheetId = process.env.GOOGLE_SHEET_ID
+    const apiKey = process.env.GOOGLE_API_KEY
+    // Test by trying to get sheet properties (a read operation)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}`
 
-    // Test Google Sheets connection
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!)
-
-    console.log("🔐 Attempting service account authentication...")
-
-    // Use service account auth with credentials object
-    await doc.useServiceAccountAuth({
-      client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
-      private_key: privateKey,
+    console.log(`🚀 Calling Google Sheets API (GET metadata): ${url}`)
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
     })
 
-    console.log("✅ Service account auth successful")
+    const responseData = await response.json()
 
-    await doc.loadInfo()
+    if (!response.ok) {
+      console.error("❌ Google Sheets API error (GET metadata):", responseData)
+      return NextResponse.json({
+        success: false,
+        error: `Google Sheets API Error: ${responseData.error?.message || response.statusText}`,
+      })
+    }
 
-    console.log("Google Sheets connection successful!")
-    console.log("Sheet title:", doc.title)
-
+    console.log("✅ Successfully fetched sheet metadata:", responseData.properties.title)
     return NextResponse.json({
       success: true,
-      message: "Google Sheets connection working with service account!",
-      sheetTitle: doc.title,
-      sheetCount: doc.sheetCount,
-      keyCheck,
-      hasApiKey,
+      message: "Google Sheets connection working with direct API call!",
+      sheetTitle: responseData.properties.title,
     })
   } catch (error) {
-    console.error("Google Sheets test failed:", error)
-
+    console.error("Google Sheets test failed (direct API):", error)
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : String(error),
