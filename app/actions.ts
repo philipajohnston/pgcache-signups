@@ -67,17 +67,11 @@ export async function submitEmail(formData: FormData) {
     // Convert metadata to JSON string
     const metadataString = JSON.stringify(metadata)
 
-    // Try to store email in Google Spreadsheet
+    // Store email in Google Spreadsheet - this MUST succeed
     console.log("Attempting Google Sheets integration...")
     const spreadsheetResult = await addEmailToSpreadsheet(email, timestamp, metadataString)
 
-    if (spreadsheetResult.success) {
-      console.log("✅ Successfully added email to spreadsheet")
-      return {
-        success: true,
-        message: "Thank you for your interest! We'll be in touch soon.",
-      }
-    } else {
+    if (!spreadsheetResult.success) {
       console.error("❌ Failed to add email to spreadsheet:", spreadsheetResult.error)
 
       // Log the email for manual recovery
@@ -87,12 +81,18 @@ export async function submitEmail(formData: FormData) {
         metadata: metadataString,
       })
 
-      // Return success to user but log the failure
+      // Return failure so user gets the error message to email you directly
       return {
-        success: true,
+        success: false,
         message:
-          "Thank you for your interest! We'll be in touch soon. (Note: There was a backend issue, but your email was logged for manual processing)",
+          "The AI agent seems to have made a coding error. Send an email to philip@pgcache.com and we'll make sure you get on the list!",
       }
+    }
+
+    console.log("✅ Successfully added email to spreadsheet")
+    return {
+      success: true,
+      message: "Thank you for your interest! We'll be in touch soon.",
     }
   } catch (error) {
     console.error("💥 Critical error in submitEmail:", error)
@@ -109,7 +109,8 @@ export async function submitEmail(formData: FormData) {
 
     return {
       success: false,
-      message: "There was a technical issue. Please email philip@pgcache.com directly and we'll add you to the list!",
+      message:
+        "The AI agent seems to have made a coding error. Send an email to philip@pgcache.com and we'll make sure you get on the list!",
     }
   }
 }
@@ -149,21 +150,30 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
     console.log("🔑 Formatting private key...")
     const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n")
 
-    console.log("🔐 Creating JWT auth with API key...")
+    // Log first and last few characters of key for debugging (safely)
+    console.log("Private key format check:", {
+      startsWithBegin: privateKey.startsWith("-----BEGIN"),
+      endsWithEnd: privateKey.endsWith("-----"),
+      length: privateKey.length,
+      hasNewlines: privateKey.includes("\n"),
+    })
 
-    // Initialize auth with service account credentials AND API key
+    console.log("🔐 Creating JWT auth...")
+
+    // Initialize auth with service account credentials
     const serviceAccountAuth = new JWT({
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       key: privateKey,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     })
 
-    console.log("📊 Initializing Google Spreadsheet with API key...")
+    console.log("📊 Initializing Google Spreadsheet...")
+    console.log("Sheet ID:", process.env.GOOGLE_SHEET_ID)
 
     // Initialize the sheet with BOTH service account auth AND API key
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth)
 
-    // Set the API key for the document
+    // Set the API key for the document - this is crucial for the new Google API requirements
     doc.useApiKey(process.env.GOOGLE_API_KEY)
 
     console.log("📋 Loading spreadsheet info...")
