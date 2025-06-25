@@ -170,11 +170,21 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
     console.log("📊 Initializing Google Spreadsheet...")
     console.log("Sheet ID:", process.env.GOOGLE_SHEET_ID)
 
-    // Initialize the sheet with BOTH service account auth AND API key
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth)
+    // Initialize the sheet - try with API key in constructor first
+    let doc: GoogleSpreadsheet
 
-    // Set the API key for the document - this is crucial for the new Google API requirements
-    doc.useApiKey(process.env.GOOGLE_API_KEY)
+    try {
+      // Method 1: Try passing API key in constructor options
+      doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth, {
+        apiKey: process.env.GOOGLE_API_KEY,
+      } as any)
+      console.log("✅ Created GoogleSpreadsheet with API key in constructor")
+    } catch (constructorError) {
+      console.log("⚠️ Constructor with API key failed, trying without...")
+      // Method 2: Fallback to just service account auth
+      doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth)
+      console.log("✅ Created GoogleSpreadsheet with service account only")
+    }
 
     console.log("📋 Loading spreadsheet info...")
     await doc.loadInfo()

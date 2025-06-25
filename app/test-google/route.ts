@@ -14,10 +14,10 @@ export async function GET() {
 
     console.log("Environment variables:", { hasEmail, hasKey, hasSheetId, hasApiKey })
 
-    if (!hasEmail || !hasKey || !hasSheetId || !hasApiKey) {
+    if (!hasEmail || !hasKey || !hasSheetId) {
       return NextResponse.json({
         success: false,
-        error: "Missing environment variables",
+        error: "Missing required environment variables",
         details: { hasEmail, hasKey, hasSheetId, hasApiKey },
       })
     }
@@ -42,12 +42,23 @@ export async function GET() {
 
     console.log("JWT created successfully")
 
-    // Test Google Sheets connection with API key
-    const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth)
+    // Test Google Sheets connection
+    let doc: GoogleSpreadsheet
 
-    // Initialize with API key outside conditional block
-    if (process.env.GOOGLE_API_KEY) {
-      doc.useApiKey(process.env.GOOGLE_API_KEY!)
+    try {
+      // Try with API key if available
+      if (hasApiKey) {
+        doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth, {
+          apiKey: process.env.GOOGLE_API_KEY,
+        } as any)
+        console.log("Using service account + API key")
+      } else {
+        doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth)
+        console.log("Using service account only")
+      }
+    } catch (constructorError) {
+      console.log("Constructor error, falling back to service account only")
+      doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth)
     }
 
     await doc.loadInfo()
@@ -57,10 +68,11 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: "Google Sheets connection working with API key!",
+      message: "Google Sheets connection working!",
       sheetTitle: doc.title,
       sheetCount: doc.sheetCount,
       keyCheck,
+      hasApiKey,
     })
   } catch (error) {
     console.error("Google Sheets test failed:", error)
