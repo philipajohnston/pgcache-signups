@@ -123,18 +123,21 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
     const hasEmail = !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
     const hasKey = !!process.env.GOOGLE_PRIVATE_KEY
     const hasSheetId = !!process.env.GOOGLE_SHEET_ID
+    const hasApiKey = !!process.env.GOOGLE_API_KEY
 
     console.log("Environment variables status:", {
       GOOGLE_SERVICE_ACCOUNT_EMAIL: hasEmail,
       GOOGLE_PRIVATE_KEY: hasKey,
       GOOGLE_SHEET_ID: hasSheetId,
+      GOOGLE_API_KEY: hasApiKey,
     })
 
-    if (!hasEmail || !hasKey || !hasSheetId) {
+    if (!hasEmail || !hasKey || !hasSheetId || !hasApiKey) {
       const missing = []
       if (!hasEmail) missing.push("GOOGLE_SERVICE_ACCOUNT_EMAIL")
       if (!hasKey) missing.push("GOOGLE_PRIVATE_KEY")
       if (!hasSheetId) missing.push("GOOGLE_SHEET_ID")
+      if (!hasApiKey) missing.push("GOOGLE_API_KEY")
 
       console.error("❌ Missing environment variables:", missing)
       return { success: false, error: `Missing environment variables: ${missing.join(", ")}` }
@@ -146,28 +149,22 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
     console.log("🔑 Formatting private key...")
     const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n")
 
-    // Log first and last few characters of key for debugging (safely)
-    console.log("Private key format check:", {
-      startsWithBegin: privateKey.startsWith("-----BEGIN"),
-      endsWithEnd: privateKey.endsWith("-----"),
-      length: privateKey.length,
-      hasNewlines: privateKey.includes("\n"),
-    })
+    console.log("🔐 Creating JWT auth with API key...")
 
-    console.log("🔐 Creating JWT auth...")
-
-    // Initialize auth with service account credentials
+    // Initialize auth with service account credentials AND API key
     const serviceAccountAuth = new JWT({
       email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
       key: privateKey,
       scopes: ["https://www.googleapis.com/auth/spreadsheets"],
     })
 
-    console.log("📊 Initializing Google Spreadsheet...")
-    console.log("Sheet ID:", process.env.GOOGLE_SHEET_ID)
+    console.log("📊 Initializing Google Spreadsheet with API key...")
 
-    // Initialize the sheet
+    // Initialize the sheet with BOTH service account auth AND API key
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth)
+
+    // Set the API key for the document
+    doc.useApiKey(process.env.GOOGLE_API_KEY)
 
     console.log("📋 Loading spreadsheet info...")
     await doc.loadInfo()

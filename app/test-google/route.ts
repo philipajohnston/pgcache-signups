@@ -10,14 +10,15 @@ export async function GET() {
     const hasEmail = !!process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
     const hasKey = !!process.env.GOOGLE_PRIVATE_KEY
     const hasSheetId = !!process.env.GOOGLE_SHEET_ID
+    const hasApiKey = !!process.env.GOOGLE_API_KEY
 
-    console.log("Environment variables:", { hasEmail, hasKey, hasSheetId })
+    console.log("Environment variables:", { hasEmail, hasKey, hasSheetId, hasApiKey })
 
-    if (!hasEmail || !hasKey || !hasSheetId) {
+    if (!hasEmail || !hasKey || !hasSheetId || !hasApiKey) {
       return NextResponse.json({
         success: false,
         error: "Missing environment variables",
-        details: { hasEmail, hasKey, hasSheetId },
+        details: { hasEmail, hasKey, hasSheetId, hasApiKey },
       })
     }
 
@@ -41,8 +42,14 @@ export async function GET() {
 
     console.log("JWT created successfully")
 
-    // Test Google Sheets connection
+    // Test Google Sheets connection with API key
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!, serviceAccountAuth)
+
+    // Initialize with API key outside conditional block
+    if (process.env.GOOGLE_API_KEY) {
+      doc.useApiKey(process.env.GOOGLE_API_KEY!)
+    }
+
     await doc.loadInfo()
 
     console.log("Google Sheets connection successful!")
@@ -50,7 +57,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: "Google Sheets connection working!",
+      message: "Google Sheets connection working with API key!",
       sheetTitle: doc.title,
       sheetCount: doc.sheetCount,
       keyCheck,
