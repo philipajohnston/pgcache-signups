@@ -1,7 +1,6 @@
 "use server"
 
 import { GoogleSpreadsheet } from "google-spreadsheet"
-import { JWT } from "google-auth-library"
 import { headers } from "next/headers"
 
 // Type for metadata
@@ -150,57 +149,58 @@ async function addEmailToSpreadsheet(email: string, timestamp: string, metadata:
     console.log("🔑 Formatting private key...")
     const privateKey = process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n")
 
-    console.log("🔐 Creating JWT auth...")
+    console.log("📊 Trying new approach with service account credentials object...")
 
-    // Initialize auth with service account credentials
-    const serviceAccountAuth = new JWT({
-      email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-      key: privateKey,
-      scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-    })
-
-    console.log("📊 Initializing Google Spreadsheet with proper API key setup...")
-
-    // NEW APPROACH: Initialize with both auth methods properly
+    // NEW APPROACH: Use service account credentials object
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID)
 
-    // Set API key first (for read operations)
-    doc.useApiKey(process.env.GOOGLE_API_KEY)
-
-    // Then set service account auth (for write operations)
-    doc.useServiceAccountAuth(serviceAccountAuth)
-
-    console.log("📋 Loading spreadsheet info...")
-    await doc.loadInfo()
-
-    console.log("✅ Spreadsheet loaded successfully!")
-    console.log("Spreadsheet title:", doc.title)
-    console.log("Number of sheets:", doc.sheetCount)
-
-    // Get the first sheet or create one if it doesn't exist
-    let sheet = doc.sheetsByIndex[0]
-    if (!sheet) {
-      console.log("📝 Creating new sheet...")
-      sheet = await doc.addSheet({
-        title: "PgCache Signups",
-        headerValues: ["email", "timestamp", "metadata"],
+    // Try to authenticate with service account credentials
+    try {
+      await doc.useServiceAccountAuth({
+        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+        private_key: privateKey,
       })
-      console.log("✅ New sheet created")
-    } else {
-      console.log("📄 Using existing sheet:", sheet.title)
+
+      console.log("✅ Service account auth successful")
+
+      console.log("📋 Loading spreadsheet info...")
+      await doc.loadInfo()
+
+      console.log("✅ Spreadsheet loaded successfully!")
+      console.log("Spreadsheet title:", doc.title)
+      console.log("Number of sheets:", doc.sheetCount)
+
+      // Get the first sheet or create one if it doesn't exist
+      let sheet = doc.sheetsByIndex[0]
+      if (!sheet) {
+        console.log("📝 Creating new sheet...")
+        sheet = await doc.addSheet({
+          title: "PgCache Signups",
+          headerValues: ["email", "timestamp", "metadata"],
+        })
+        console.log("✅ New sheet created")
+      } else {
+        console.log("📄 Using existing sheet:", sheet.title)
+      }
+
+      console.log("➕ Adding row to sheet...")
+
+      // Add a row with the email, timestamp, and metadata
+      await sheet.addRow({
+        email: email,
+        timestamp: timestamp,
+        metadata: metadata,
+      })
+
+      console.log("🎉 Successfully added row to sheet!")
+      return { success: true }
+    } catch (authError) {
+      console.error("💥 Authentication error:", authError)
+      return {
+        success: false,
+        error: authError instanceof Error ? authError.message : String(authError),
+      }
     }
-
-    console.log("➕ Adding row to sheet...")
-
-    // Add a row with the email, timestamp, and metadata
-    await sheet.addRow({
-      email: email,
-      timestamp: timestamp,
-      metadata: metadata,
-    })
-
-    console.log("🎉 Successfully added row to sheet!")
-    return { success: true }
   } catch (error) {
     console.error("💥 Error in addEmailToSpreadsheet:", error)
 

@@ -13,7 +13,7 @@ export async function GET() {
 
     console.log("Environment variables:", { hasEmail, hasKey, hasSheetId, hasApiKey })
 
-    if (!hasEmail || !hasKey || !hasSheetId || !hasApiKey) {
+    if (!hasEmail || !hasKey || !hasSheetId) {
       return NextResponse.json({
         success: false,
         error: "Missing required environment variables",
@@ -32,19 +32,18 @@ export async function GET() {
 
     console.log("Private key format:", keyCheck)
 
-    // Test Google Sheets connection with new approach
+    // Test Google Sheets connection
     const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID!)
 
-    // Set service account auth
-    doc.useServiceAccountAuth({
+    console.log("🔐 Attempting service account authentication...")
+
+    // Use service account auth with credentials object
+    await doc.useServiceAccountAuth({
       client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL!,
       private_key: privateKey,
     })
-    console.log("✅ Service account auth set")
 
-    // Set API key first
-    doc.useApiKey(process.env.GOOGLE_API_KEY!)
-    console.log("✅ API key set")
+    console.log("✅ Service account auth successful")
 
     await doc.loadInfo()
 
@@ -53,10 +52,11 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
-      message: "Google Sheets connection working with new API key approach!",
+      message: "Google Sheets connection working with service account!",
       sheetTitle: doc.title,
       sheetCount: doc.sheetCount,
       keyCheck,
+      hasApiKey,
     })
   } catch (error) {
     console.error("Google Sheets test failed:", error)
