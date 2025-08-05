@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useTransition, useEffect } from "react"
-import { ArrowRight, CheckCircle, Database, Zap, Shield, Wrench, Calendar } from "lucide-react"
+import { ArrowRight, CheckCircle, Zap, Shield, Wrench, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
@@ -246,40 +246,6 @@ export default function Home() {
                 Intelligently caches based on your actual query patterns. Understands PostgreSQL query semantics deeply.
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Engineer-focused Section */}
-      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-        <div className="border-t pt-10">
-          <h2 className="text-2xl font-bold text-center mb-8">By PostgreSQL Power Users, For PostgreSQL Teams</h2>
-
-          <div className="prose prose-lg max-w-3xl mx-auto text-gray-600">
-            <p>
-              We're a team of database engineers who've spent years optimizing PostgreSQL deployments. We've written
-              more EXPLAIN ANALYZE queries than we care to admit, and we've felt the pain of managing caching layers
-              firsthand.
-            </p>
-
-            <p className="mt-4">
-              PgCache was born from our own frustrations with existing solutions. We wanted something that understood
-              PostgreSQL deeply—something that could parse queries, track dependencies, and automatically invalidate
-              caches without requiring us to rewrite our applications.
-            </p>
-
-            <p className="mt-4">
-              Our transparent proxy approach means you don't need to change your code or learn complex caching patterns.
-              We'll do the annoying work for you, so you can focus on what matters: building features that delight your
-              users, not babysitting your database performance.
-            </p>
-          </div>
-
-          <div className="mt-10 text-center">
-            <p className="text-sm text-gray-600 flex items-center justify-center">
-              <Database className="h-4 w-4 mr-1" />
-              From one Postgres team to another—we've got your back.
-            </p>
           </div>
         </div>
       </section>
