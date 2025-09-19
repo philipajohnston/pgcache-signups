@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "PgCache - Easy Caching for PostgreSQL",
   description:
     "Refocus on what matters by letting our transparent postgres proxy handle the grunt work. Effortlessly stand up & maintain your caches.",
-    generator: 'v0.dev'
+    generator: 'v0.app'
 }
 
 export default function RootLayout({
@@ -22,9 +22,9 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
+    <html lang="en" className="dark">
+      <body className={`${inter.className} bg-slate-900 text-white`}>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <Suspense>{children}</Suspense>
         </ThemeProvider>
         <Analytics />

@@ -130,125 +130,148 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center">
-      {/* Header */}
-      <header className="w-full py-6 px-4 sm:px-6 lg:px-8 border-b">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">PgCache</h1>
-          <a
-            href="https://calendly.com/philip-pgcache/connect"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors"
-          >
-            <Calendar className="h-4 w-4 mr-2" />
-            Schedule a Call
-          </a>
-        </div>
-      </header>
+    <div
+      className="min-h-screen bg-slate-900 text-white"
+      style={{
+        backgroundImage: `url('/postgres-bg.jpg')`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Dark overlay for better text readability */}
+      <div className="min-h-screen bg-slate-900/80">
+        {/* Header */}
+        <header className="w-full py-6 px-4 sm:px-6 lg:px-8 border-b border-slate-700/50">
+          <div className="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+              PgCache
+            </h1>
+            <a
+              href="https://calendly.com/philip-pgcache/connect"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800/50 border border-slate-600 rounded-md hover:bg-slate-700/50 hover:text-white transition-colors backdrop-blur-sm"
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule a Call
+            </a>
+          </div>
+        </header>
 
-      {/* Hero Section */}
-      <section className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="text-center">
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-4">
-            Easy Caching for PostgreSQL
-          </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
-            Refocus on what matters by letting our transparent postgres proxy handle the grunt work. Effortlessly stand
-            up & maintain your caches.
-          </p>
+        {/* Hero Section */}
+        <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+          <div className="text-center">
+            <h2 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent tracking-tight mb-6">
+              Easy Caching for PostgreSQL
+            </h2>
+            <p className="text-xl text-slate-400 max-w-4xl mx-auto mb-12 leading-relaxed">
+              Refocus on what matters by letting our transparent postgres proxy handle the grunt work. Effortlessly
+              stand up & maintain your caches.
+            </p>
 
-          {/* Email Form */}
-          {!isSubmitted ? (
-            <div className="max-w-md mx-auto">
-              <form onSubmit={handleSubmit}>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-grow">
-                    <Input
-                      type="email"
-                      name="email"
-                      placeholder="Enter your email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`w-full ${!isValid ? "border-red-500 focus:ring-red-500" : ""}`}
-                      aria-label="Email address"
+            {/* Email Form */}
+            {!isSubmitted ? (
+              <div className="max-w-md mx-auto mb-8">
+                <form onSubmit={handleSubmit}>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex-grow">
+                      <Input
+                        type="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`w-full bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 backdrop-blur-sm ${
+                          !isValid ? "border-red-500 focus:ring-red-500/20" : ""
+                        }`}
+                        aria-label="Email address"
+                        disabled={isPending}
+                      />
+                      {!isValid && errorMessage && (
+                        <p className="text-red-400 text-sm mt-1 text-left">{errorMessage}</p>
+                      )}
+                    </div>
+                    <Button
+                      type="submit"
+                      className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white border-0 px-6 py-2 font-medium"
                       disabled={isPending}
-                    />
-                    {!isValid && errorMessage && <p className="text-red-500 text-sm mt-1 text-left">{errorMessage}</p>}
+                    >
+                      {isPending ? "Submitting..." : "Notify Me"}
+                      {!isPending && <ArrowRight className="ml-2 h-4 w-4" />}
+                    </Button>
                   </div>
-                  <Button type="submit" className="whitespace-nowrap" disabled={isPending}>
-                    {isPending ? "Submitting..." : "Notify Me"}
-                    {!isPending && <ArrowRight className="ml-2 h-4 w-4" />}
-                  </Button>
-                </div>
-                <p className="text-sm text-gray-500 mt-2">Be the first to know when our MVP launches</p>
-              </form>
+                  <p className="text-sm text-slate-500 mt-3">Be the first to know when our MVP launches</p>
+                </form>
 
-              {/* Alternative CTA */}
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-3">Want to discuss your specific caching needs?</p>
-                <a
-                  href="https://calendly.com/philip-pgcache/connect"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 hover:text-blue-700 transition-colors"
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Schedule a 25-minute chat
-                </a>
+                {/* Alternative CTA */}
+                <div className="mt-8">
+                  <p className="text-blue-400 text-sm">
+                    Want to discuss your specific caching needs?{" "}
+                    <a
+                      href="https://calendly.com/philip-pgcache/connect"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                    >
+                      Schedule a 25-minute chat
+                    </a>
+                  </p>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="max-w-md mx-auto bg-green-50 p-4 rounded-lg border border-green-200">
-              <div className="flex items-center">
-                <CheckCircle className="h-6 w-6 text-green-500 mr-2" />
-                <p className="text-green-800 font-medium">
-                  {formMessage || "Thanks! We'll notify you when we launch."}
+            ) : (
+              <div className="max-w-md mx-auto bg-green-900/20 border border-green-700/50 p-4 rounded-lg backdrop-blur-sm">
+                <div className="flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-green-400 mr-2" />
+                  <p className="text-green-300 font-medium">
+                    {formMessage || "Thanks! We'll notify you when we launch."}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="w-full py-16">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-lg border border-slate-700/50 hover:bg-slate-800/40 transition-colors">
+                <div className="flex items-center mb-4">
+                  <Zap className="h-6 w-6 text-yellow-400 mr-3" />
+                  <h3 className="font-bold text-lg text-white">Transparent Proxy</h3>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  Drop-in solution that sits between your app and database. No code changes required, just point and
+                  cache.
+                </p>
+              </div>
+
+              <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-lg border border-slate-700/50 hover:bg-slate-800/40 transition-colors">
+                <div className="flex items-center mb-4">
+                  <Wrench className="h-6 w-6 text-blue-400 mr-3" />
+                  <h3 className="font-bold text-lg text-white">Maintenance-Free</h3>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  Automatic cache invalidation and management. No more writing complex cache logic or debugging stale
+                  data.
+                </p>
+              </div>
+
+              <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-lg border border-slate-700/50 hover:bg-slate-800/40 transition-colors">
+                <div className="flex items-center mb-4">
+                  <Shield className="h-6 w-6 text-purple-400 mr-3" />
+                  <h3 className="font-bold text-lg text-white">Query-Aware</h3>
+                </div>
+                <p className="text-slate-400 leading-relaxed">
+                  Intelligently caches based on your actual query patterns. Understands PostgreSQL query semantics
+                  deeply.
                 </p>
               </div>
             </div>
-          )}
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="w-full bg-gray-50 py-16">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="flex items-center mb-4">
-                <Zap className="h-6 w-6 text-yellow-500 mr-2" />
-                <h3 className="font-bold text-lg">Transparent Proxy</h3>
-              </div>
-              <p className="text-gray-600">
-                Drop-in solution that sits between your app and database. No code changes required, just point and
-                cache.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="flex items-center mb-4">
-                <Wrench className="h-6 w-6 text-blue-500 mr-2" />
-                <h3 className="font-bold text-lg">Maintenance-Free</h3>
-              </div>
-              <p className="text-gray-600">
-                Automatic cache invalidation and management. No more writing complex cache logic or debugging stale
-                data.
-              </p>
-            </div>
-
-            <div className="bg-white p-6 rounded-lg shadow-sm border">
-              <div className="flex items-center mb-4">
-                <Shield className="h-6 w-6 text-purple-500 mr-2" />
-                <h3 className="font-bold text-lg">Query-Aware</h3>
-              </div>
-              <p className="text-gray-600">
-                Intelligently caches based on your actual query patterns. Understands PostgreSQL query semantics deeply.
-              </p>
-            </div>
           </div>
-        </div>
-      </section>
-    </main>
+        </section>
+      </div>
+    </div>
   )
 }
