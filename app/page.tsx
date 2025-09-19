@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useTransition, useEffect } from "react"
 import { ArrowRight, CheckCircle, Zap, Shield, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -158,14 +157,14 @@ export default function Home() {
             >
               PgCache
             </h1>
-            <a
-              href="https://calendly.com/philip-pgcache/connect"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-white/10 transition-colors"
+            <Button
+              asChild
+              className="text-white text-sm font-medium px-4 py-2 bg-slate-800/40 border border-slate-600/50 rounded-lg hover:bg-slate-700/50 hover:border-slate-500/50 transition-all duration-200 backdrop-blur-sm"
             >
-              Schedule a Call
-            </a>
+              <a href="https://calendly.com/philip-pgcache/connect" target="_blank" rel="noopener noreferrer">
+                Schedule a Call
+              </a>
+            </Button>
           </div>
         </header>
 
@@ -230,21 +229,21 @@ export default function Home() {
                   <div className="text-center">
                     <p className="text-blue-400 text-sm">
                       Want to discuss your specific caching needs?{" "}
-                      <a
-                        href="https://calendly.com/philip-pgcache/connect"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Button
+                        asChild
                         className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors font-medium"
                       >
-                        Schedule a 25-minute chat
-                      </a>
+                        <a href="https://calendly.com/philip-pgcache/connect" target="_blank" rel="noopener noreferrer">
+                          Schedule a 25-minute chat
+                        </a>
+                      </Button>
                     </p>
                   </div>
                 </div>
               ) : (
                 <div className="max-w-md mx-auto bg-emerald-900/20 border border-emerald-700/50 p-6 rounded-lg backdrop-blur-sm mb-8">
                   <div className="flex items-center justify-center">
-                    <CheckCircle className="h-6 w-6 text-emerald-400 mr-3" />
+                    <CheckCircle className="h-6 w-6 text-emerald-400 mr-3 flex-shrink-0" />
                     <p className="text-emerald-300 font-medium">
                       {formMessage || "Thanks! We'll notify you when we launch."}
                     </p>
@@ -258,25 +257,37 @@ export default function Home() {
         {/* Value Propositions - Fixed at bottom, always visible */}
         <div className="flex-shrink-0 w-full py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex items-center justify-center md:justify-start">
-                <Zap className="h-8 w-8 text-blue-400 mr-4 flex-shrink-0" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="flex items-start">
+                <Zap className="h-8 w-8 text-blue-400 mr-4 flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-bold text-lg text-white">Transparent Proxy</h3>
+                  <h3 className="font-bold text-lg text-white mb-2">Transparent Proxy</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Drop-in solution that sits between your app and database. No code changes required, just point and
+                    cache.
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center md:justify-start">
-                <Shield className="h-8 w-8 text-purple-400 mr-4 flex-shrink-0" />
+              <div className="flex items-start">
+                <Shield className="h-8 w-8 text-purple-400 mr-4 flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-bold text-lg text-white">Maintenance-Free</h3>
+                  <h3 className="font-bold text-lg text-white mb-2">Maintenance-Free</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Automatic cache invalidation and management. No more writing complex cache logic or debugging stale
+                    data.
+                  </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-center md:justify-start">
-                <Wrench className="h-8 w-8 text-teal-400 mr-4 flex-shrink-0" />
+              <div className="flex items-start">
+                <Wrench className="h-8 w-8 text-teal-400 mr-4 flex-shrink-0 mt-1" />
                 <div>
-                  <h3 className="font-bold text-lg text-white">Query-Aware</h3>
+                  <h3 className="font-bold text-lg text-white mb-2">Query-Aware</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Intelligently caches based on your actual query patterns. Understands PostgreSQL query semantics
+                    deeply.
+                  </p>
                 </div>
               </div>
             </div>
