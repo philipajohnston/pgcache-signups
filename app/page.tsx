@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState, useTransition, useEffect } from "react"
-import { ArrowRight, CheckCircle, Zap, Shield, Wrench, Calendar } from "lucide-react"
+import { ArrowRight, CheckCircle, Zap, Shield, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
@@ -131,40 +131,53 @@ export default function Home() {
 
   return (
     <div
-      className="min-h-screen bg-slate-900 text-white"
+      className="min-h-screen bg-slate-950 text-white relative overflow-hidden"
       style={{
-        backgroundImage: `url('/postgres-bg.jpg')`,
+        backgroundImage: `url('/postgres-database-bg.jpg')`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
       }}
     >
       {/* Dark overlay for better text readability */}
-      <div className="min-h-screen bg-slate-900/80">
+      <div className="absolute inset-0 bg-slate-950/60"></div>
+
+      {/* Content */}
+      <div className="relative z-10 min-h-screen">
         {/* Header */}
-        <header className="w-full py-6 px-4 sm:px-6 lg:px-8 border-b border-slate-700/50">
+        <header className="w-full py-6 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
               PgCache
             </h1>
-            <a
-              href="https://calendly.com/philip-pgcache/connect"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-300 bg-slate-800/50 border border-slate-600 rounded-md hover:bg-slate-700/50 hover:text-white transition-colors backdrop-blur-sm"
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule a Call
-            </a>
+            <button className="text-white text-sm font-medium px-4 py-2 rounded-md hover:bg-white/10 transition-colors">
+              <a
+                href="https://calendly.com/philip-pgcache/connect"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center"
+              >
+                Schedule a Call
+              </a>
+            </button>
           </div>
         </header>
 
         {/* Hero Section */}
-        <section className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+        <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-32">
           <div className="text-center">
-            <h2 className="text-4xl md:text-6xl font-extrabold bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 bg-clip-text text-transparent tracking-tight mb-6">
+            <h2
+              className="text-5xl md:text-7xl font-bold mb-8 leading-tight"
+              style={{
+                background: "linear-gradient(135deg, #3B82F6 0%, #1E40AF 25%, #6366F1 50%, #8B5CF6 75%, #A855F7 100%)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+              }}
+            >
               Easy Caching for PostgreSQL
             </h2>
+
             <p className="text-xl text-slate-400 max-w-4xl mx-auto mb-12 leading-relaxed">
               Refocus on what matters by letting our transparent postgres proxy handle the grunt work. Effortlessly
               stand up & maintain your caches.
@@ -172,9 +185,9 @@ export default function Home() {
 
             {/* Email Form */}
             {!isSubmitted ? (
-              <div className="max-w-md mx-auto mb-8">
+              <div className="max-w-lg mx-auto mb-8">
                 <form onSubmit={handleSubmit}>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex flex-col sm:flex-row gap-4 mb-4">
                     <div className="flex-grow">
                       <Input
                         type="email"
@@ -182,37 +195,37 @@ export default function Home() {
                         placeholder="Enter your email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full bg-slate-800/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 backdrop-blur-sm ${
-                          !isValid ? "border-red-500 focus:ring-red-500/20" : ""
+                        className={`w-full h-12 bg-slate-800/40 border border-slate-600/50 text-white placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500/50 rounded-lg backdrop-blur-sm ${
+                          !isValid ? "border-red-500 focus:ring-red-500/50" : ""
                         }`}
                         aria-label="Email address"
                         disabled={isPending}
                       />
                       {!isValid && errorMessage && (
-                        <p className="text-red-400 text-sm mt-1 text-left">{errorMessage}</p>
+                        <p className="text-red-400 text-sm mt-2 text-left">{errorMessage}</p>
                       )}
                     </div>
                     <Button
                       type="submit"
-                      className="whitespace-nowrap bg-blue-600 hover:bg-blue-700 text-white border-0 px-6 py-2 font-medium"
+                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white border-0 rounded-lg font-medium text-base shadow-lg shadow-blue-600/25 transition-all duration-200"
                       disabled={isPending}
                     >
                       {isPending ? "Submitting..." : "Notify Me"}
                       {!isPending && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
                   </div>
-                  <p className="text-sm text-slate-500 mt-3">Be the first to know when our MVP launches</p>
+                  <p className="text-sm text-slate-500 mb-6">Be the first to know when our MVP launches</p>
                 </form>
 
                 {/* Alternative CTA */}
-                <div className="mt-8">
+                <div className="text-center">
                   <p className="text-blue-400 text-sm">
                     Want to discuss your specific caching needs?{" "}
                     <a
                       href="https://calendly.com/philip-pgcache/connect"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors"
+                      className="text-blue-400 hover:text-blue-300 underline underline-offset-2 transition-colors font-medium"
                     >
                       Schedule a 25-minute chat
                     </a>
@@ -220,10 +233,10 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="max-w-md mx-auto bg-green-900/20 border border-green-700/50 p-4 rounded-lg backdrop-blur-sm">
+              <div className="max-w-md mx-auto bg-emerald-900/20 border border-emerald-700/50 p-6 rounded-lg backdrop-blur-sm">
                 <div className="flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6 text-green-400 mr-2" />
-                  <p className="text-green-300 font-medium">
+                  <CheckCircle className="h-6 w-6 text-emerald-400 mr-3" />
+                  <p className="text-emerald-300 font-medium">
                     {formMessage || "Thanks! We'll notify you when we launch."}
                   </p>
                 </div>
@@ -233,37 +246,37 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section className="w-full py-16">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="w-full py-20">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-lg border border-slate-700/50 hover:bg-slate-800/40 transition-colors">
-                <div className="flex items-center mb-4">
-                  <Zap className="h-6 w-6 text-yellow-400 mr-3" />
-                  <h3 className="font-bold text-lg text-white">Transparent Proxy</h3>
+              <div className="bg-slate-800/20 backdrop-blur-sm p-8 rounded-xl border border-slate-700/30 hover:bg-slate-800/30 transition-all duration-300 hover:border-slate-600/50">
+                <div className="flex items-center mb-6">
+                  <Zap className="h-7 w-7 text-yellow-400 mr-4" />
+                  <h3 className="font-bold text-xl text-white">Transparent Proxy</h3>
                 </div>
-                <p className="text-slate-400 leading-relaxed">
+                <p className="text-slate-400 leading-relaxed text-base">
                   Drop-in solution that sits between your app and database. No code changes required, just point and
                   cache.
                 </p>
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-lg border border-slate-700/50 hover:bg-slate-800/40 transition-colors">
-                <div className="flex items-center mb-4">
-                  <Wrench className="h-6 w-6 text-blue-400 mr-3" />
-                  <h3 className="font-bold text-lg text-white">Maintenance-Free</h3>
+              <div className="bg-slate-800/20 backdrop-blur-sm p-8 rounded-xl border border-slate-700/30 hover:bg-slate-800/30 transition-all duration-300 hover:border-slate-600/50">
+                <div className="flex items-center mb-6">
+                  <Wrench className="h-7 w-7 text-blue-400 mr-4" />
+                  <h3 className="font-bold text-xl text-white">Maintenance-Free</h3>
                 </div>
-                <p className="text-slate-400 leading-relaxed">
+                <p className="text-slate-400 leading-relaxed text-base">
                   Automatic cache invalidation and management. No more writing complex cache logic or debugging stale
                   data.
                 </p>
               </div>
 
-              <div className="bg-slate-800/30 backdrop-blur-sm p-6 rounded-lg border border-slate-700/50 hover:bg-slate-800/40 transition-colors">
-                <div className="flex items-center mb-4">
-                  <Shield className="h-6 w-6 text-purple-400 mr-3" />
-                  <h3 className="font-bold text-lg text-white">Query-Aware</h3>
+              <div className="bg-slate-800/20 backdrop-blur-sm p-8 rounded-xl border border-slate-700/30 hover:bg-slate-800/30 transition-all duration-300 hover:border-slate-600/50">
+                <div className="flex items-center mb-6">
+                  <Shield className="h-7 w-7 text-purple-400 mr-4" />
+                  <h3 className="font-bold text-xl text-white">Query-Aware</h3>
                 </div>
-                <p className="text-slate-400 leading-relaxed">
+                <p className="text-slate-400 leading-relaxed text-base">
                   Intelligently caches based on your actual query patterns. Understands PostgreSQL query semantics
                   deeply.
                 </p>
