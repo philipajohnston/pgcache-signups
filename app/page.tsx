@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle, Zap, Shield, Wrench } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { submitEmail } from "./actions"
+import Link from "next/link"
 
 // Function to get UTM parameters from URL
 function getUTMParams() {
@@ -157,14 +158,22 @@ export default function Home() {
             >
               PgCache
             </h1>
-            <Button
-              asChild
-              className="text-white text-sm font-medium px-3 sm:px-4 py-2 bg-slate-800/40 border border-slate-600/50 rounded-lg hover:bg-slate-700/50 hover:border-slate-500/50 transition-all duration-200 backdrop-blur-sm"
-            >
-              <a href="https://calendly.com/philip-pgcache/connect" target="_blank" rel="noopener noreferrer">
-                Schedule a Call
-              </a>
-            </Button>
+            <div className="flex items-center gap-4">
+              <Link
+                href="/about"
+                className="text-white text-sm font-medium px-3 sm:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                About Us
+              </Link>
+              <Button
+                asChild
+                className="text-white text-sm font-medium px-3 sm:px-4 py-2 bg-slate-800/40 border border-slate-600/50 rounded-lg hover:bg-slate-700/50 hover:border-slate-500/50 transition-all duration-200 backdrop-blur-sm"
+              >
+                <a href="https://calendly.com/philip-pgcache/connect" target="_blank" rel="noopener noreferrer">
+                  Schedule a Call
+                </a>
+              </Button>
+            </div>
           </div>
         </header>
 
