@@ -173,8 +173,24 @@ export default function Home() {
           {/* Hero Section - Centered */}
           <div className="flex-1 flex items-center justify-center">
             <div className="max-w-5xl mx-auto text-center w-full">
-              <h2
+            
+            {
+              /* <h2
                 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 leading-tight px-4"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #3B82F6 0%, #1E40AF 25%, #6366F1 50%, #8B5CF6 75%, #A855F7 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
+                Easy Caching for PostgreSQL
+              </h2> */
+              }
+
+              <h2
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 md:mb-8 leading-[1.2] break-words"
                 style={{
                   background:
                     "linear-gradient(135deg, #3B82F6 0%, #1E40AF 25%, #6366F1 50%, #8B5CF6 75%, #A855F7 100%)",
